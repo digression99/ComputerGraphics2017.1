@@ -13,6 +13,7 @@
 #include <GLUT/glut.h>
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
+#include <cstdlib>
 
 using namespace std;
 
@@ -20,8 +21,7 @@ GLuint g_ProgramID;
 
 GLuint VAOs[2];
 
-GLuint VBOs[3]; // 0513 수정, 3개로 만듦
-
+GLuint VBOs[3]; // 0513 수정, 3개로 만듦 // vbo[0] - vertex, vbo[1] - color, vbo[2] - index
 
 GLuint g_moveLoc;
 GLuint g_thetaLoc;
@@ -42,13 +42,14 @@ bool rotateMode;
 float angle;
 
 vector<GLfloat> cube_vtxBufferData2;
-vector<GLuint> cube_colorBufferData2;
+vector<GLfloat> cube_colorBufferData2; // 이게 gluint이면 다 짤리고 검은색 된다..
 vector<GLuint> cube_indexData2;
 
 //
 // tessellation height
 float diff = 0.1;
 float nowheight = 0.1;
+int startidx = 7;
 //
 
 
@@ -197,11 +198,15 @@ void renderScene(void)
         //angle += 0.00001f;
         //rotateMode = false;
     }
+    
     GLuint matLoc = glGetUniformLocation(g_ProgramID, "tranMat");
     glUniformMatrix4fv(matLoc, 1, GL_FALSE, &mainMat[0][0]);
     glBindVertexArray(VAOs[0]);
     //  glDrawArrays(GL_TRIANGLES, 0, g_numVtxObj1);
-    glDrawElements(GL_TRIANGLES, g_numVtxObj1, GL_UNSIGNED_INT, ((GLvoid*)(0)));
+    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, VBOs[2]);
+    glDrawElements(GL_TRIANGLES, g_numVtxObj1, GL_UNSIGNED_INT, ((GLvoid*)(0))); // 확실히 vao는 [0]만 쓴다.
+    
+    
     /*
      setTraf=nslation(mat, 0.5, g_second[1], g_second[2]);
      glUniformMatrix4fv(matLoc, 1, GL_FALSE, mat);
@@ -230,7 +235,7 @@ void init()
      }
      */
     //select the background color
-    glClearColor(0.0, 0.0, 0.0, 1.0);
+    glClearColor(0.5, 0.5, 0.5, 1.0);
     glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
     glEnable(GL_DEPTH_TEST);
     
@@ -242,15 +247,21 @@ void init()
     rotateMode = false;
     angle = 0.0f;
     
-    for (int i = 0; i < 48; ++i)//sizeof(cube_vtxBufferData) / sizeof(cube_vtxBufferData[0]); ++i)
+    for (int i = 0; i < 36; ++i)
     {
-        if (i < 36)
-        {
-            cube_indexData2.push_back(cube_indexData[i]);
-        }
-        cube_vtxBufferData2.push_back(cube_vtxBufferData[i]);
+        cube_indexData2.push_back(cube_indexData[i]);
     }
-    //cube_vertexBufferData2.push_back(
+    for (int i = 0; i < 48; ++i)
+    {
+        if (i % 6 < 3)
+        {
+            cube_vtxBufferData2.push_back(cube_vtxBufferData[i]);
+        }
+        else
+        {
+            cube_colorBufferData2.push_back(cube_vtxBufferData[i]);
+        }
+    }
     
 }
 
@@ -282,147 +293,46 @@ void myKeyboard(unsigned char key, int x, int y)
             g_second[2] -= 0.1;
             break;
         case 'y':
-            int idx = cube_vtxBufferData2.size();
+            //int idx = cube_vtxBufferData2.size();
             nowheight += diff;
-            
-            cube_vtxBufferData2.push_back(-0.1);
-            cube_vtxBufferData2.push_back(nowheight);
-            cube_vtxBufferData2.push_back(0.1);
-            
-            cube_colorBufferData2.push_back(0.0);
-            cube_colorBufferData2.push_back(0.0);
-            cube_colorBufferData2.push_back(1.0);
-            
-            cube_vtxBufferData2.push_back(0.1);
-            cube_vtxBufferData2.push_back(nowheight);
-            cube_vtxBufferData2.push_back(0.1);
-            
-            cube_colorBufferData2.push_back(0.0);
-            cube_colorBufferData2.push_back(0.0);
-            cube_colorBufferData2.push_back(1.0);
-            
-            cube_vtxBufferData2.push_back(0.1);
-            cube_vtxBufferData2.push_back(nowheight);
-            cube_vtxBufferData2.push_back(-0.1);
-            
-            cube_colorBufferData2.push_back(0.0);
-            cube_colorBufferData2.push_back(0.0);
-            cube_colorBufferData2.push_back(1.0);
-            
-            cube_vtxBufferData2.push_back(-0.1);
-            cube_vtxBufferData2.push_back(nowheight);
-            cube_vtxBufferData2.push_back(-0.1);
-            
-            cube_colorBufferData2.push_back(0.0);
-            cube_colorBufferData2.push_back(0.0);
-            cube_colorBufferData2.push_back(1.0);
-            
-//            cube_vtxBufferData[idx++] = 0.0;
-//            cube_vtxBufferData[idx++] = 0.2;
-//            cube_vtxBufferData[idx++] = 0.1;
-//            
-//            cube_vtxBufferData[idx++] = 0.0;
-//            cube_vtxBufferData[idx++] = 0.0;
-//            cube_vtxBufferData[idx++] = 1.0;
-//            
-//            cube_vtxBufferData[idx++] = 0.2;
-//            cube_vtxBufferData[idx++] = 0.2;
-//            cube_vtxBufferData[idx++] = 0.1;
-//            
-//            cube_vtxBufferData[idx++] = 0.0;
-//            cube_vtxBufferData[idx++] = 0.0;
-//            cube_vtxBufferData[idx++] = 1.0;
-//            
-//            cube_vtxBufferData[idx++] = 0.2;
-//            cube_vtxBufferData[idx++] = 0.2;
-//            cube_vtxBufferData[idx++] = -0.1;
-//            
-//            cube_vtxBufferData[idx++] = 0.0;
-//            cube_vtxBufferData[idx++] = 0.0;
-//            cube_vtxBufferData[idx++] = 1.0;
-//            
-//            cube_vtxBufferData[idx++] = 0.0;
-//            cube_vtxBufferData[idx++] = 0.2;
-//            cube_vtxBufferData[idx++] = -0.1;
-//            
-//            cube_vtxBufferData[idx++] = 0.0;
-//            cube_vtxBufferData[idx++] = 0.0;
-//            cube_vtxBufferData[idx++] = 1.0;
+            float offset[8] = { -0.1, 0.1,
+                0.1, 0.1, 0.1, -0.1, -0.1, -0.1};
+            for (int i = 0; i < 8; i += 2)
+            {
+                cube_vtxBufferData2.push_back(offset[i]);
+                cube_vtxBufferData2.push_back(nowheight);
+                cube_vtxBufferData2.push_back(offset[i + 1]);
+                for (int j = 0; j < 3; ++j)
+                    cube_colorBufferData2.push_back(rand() / double(RAND_MAX));
+            }
             
             glBindBuffer(GL_ARRAY_BUFFER, VBOs[0]);
-            glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*12*6, cube_vtxBufferData, GL_STATIC_DRAW);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * cube_vtxBufferData2.size(),
+                         &cube_vtxBufferData2[0], GL_STATIC_DRAW);
+            glBindBuffer(GL_ARRAY_BUFFER, VBOs[1]);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * cube_colorBufferData2.size(),
+                         &cube_colorBufferData2[0], GL_STATIC_DRAW);
             
-            //idx = 36;
+            int newidx = startidx + 1;
+            int idxoffset[24] = {0, -4, -3,
+            0, -3, 1,
+            1, -3, -2,
+            1, -2, 2,
+            2, -2, -1,
+            2, -1, 3,
+            3, -1, -4,
+            3, -4, 0};
             
-            cube_indexData2.push_back(8);
-            cube_indexData2.push_back(4);
-            cube_indexData2.push_back(5);
-            
-            cube_indexData2.push_back(8);
-            cube_indexData2.push_back(5);
-            cube_indexData2.push_back(9);
-            
-            cube_indexData2.push_back(9);
-            cube_indexData2.push_back(5);
-            cube_indexData2.push_back(6);
-            
-            cube_indexData2.push_back(9);
-            cube_indexData2.push_back(6);
-            cube_indexData2.push_back(10);
-            
-            cube_indexData2.push_back(10);
-            cube_indexData2.push_back(6);
-            cube_indexData2.push_back(7);
-            
-            cube_indexData2.push_back(10);
-            cube_indexData2.push_back(7);
-            cube_indexData2.push_back(11);
-            
-            cube_indexData2.push_back(11);
-            cube_indexData2.push_back(7);
-            cube_indexData2.push_back(4);
-            
-            cube_indexData2.push_back(11);
-            cube_indexData2.push_back(4);
-            cube_indexData2.push_back(8);
-            
-//            cube_indexData[idx++] = 8;
-//            cube_indexData[idx++] = 4;
-//            cube_indexData[idx++] = 5;
-//            
-//            cube_indexData[idx++] = 8;
-//            cube_indexData[idx++] = 5;
-//            cube_indexData[idx++] = 9;
-//            
-//            cube_indexData[idx++] = 9;
-//            cube_indexData[idx++] = 5;
-//            cube_indexData[idx++] = 6;
-//            
-//            cube_indexData[idx++] = 9;
-//            cube_indexData[idx++] = 6;
-//            cube_indexData[idx++] = 10;
-//            
-//            cube_indexData[idx++] = 10;
-//            cube_indexData[idx++] = 6;
-//            cube_indexData[idx++] = 7;
-//            
-//            cube_indexData[idx++] = 10;
-//            cube_indexData[idx++] = 7;
-//            cube_indexData[idx++] = 11;
-//            
-//            cube_indexData[idx++] = 11;
-//            cube_indexData[idx++] = 7;
-//            cube_indexData[idx++] = 4;
-//            
-//            cube_indexData[idx++] = 11;
-//            cube_indexData[idx++] = 4;
-//            cube_indexData[idx++] = 8;
-            
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, VBOs[1]);
+            for (int i = 0; i < 24; ++i)
+            {
+                cube_indexData2.push_back(newidx + idxoffset[i]);
+            }
+            startidx += 4;
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, VBOs[2]);
             //glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint)*60, &cube_indexData2[0], GL_STATIC_DRAW);
             glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint)*cube_indexData2.size(), &cube_indexData2[0], GL_STATIC_DRAW);
             
-            g_numVtxObj1 += 8*3;
+            g_numVtxObj1 += 8*3; // index 의 개수가 는 만큼 더한다.
             break;
     };
     glutPostRedisplay();
@@ -459,43 +369,43 @@ void myMouse(int button, int status, int x, int y)
     glutPostRedisplay();
 }
 
-int createThreeTriangles(GLuint vboID)
-{
-    GLfloat vtxBufferData[] = {
-        -0.5, 0.0, 0.0, 0.0, 0.0, 1.0,
-        0.5, 0.0, 0.0, 0.0, 0.0, 1.0,
-        0.0, 0.5, 0.0, 0.0, 0.0, 1.0,
-        0.0, 0.1, -0.5, 1.0, 0.0, 0.0,
-        0.8, 0.1, -0.5, 1.0, 0.0, 0.0,
-        0.4, 0.8, -0.5, 1.0, 0.0, 0.0,
-        0.0, -0.5, 0.5, 0.0, 1.0, 0.0,
-        0.8, -0.5, 0.5, 0.0, 1.0, 0.0,
-        0.4, 0.3, 0.5, 0.0, 1.0, 0.0
-    };
-    glBindBuffer(GL_ARRAY_BUFFER, vboID);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*9*6, vtxBufferData, GL_STATIC_DRAW);
-    
-    return 9;
-}
-
-int createTheeLines(GLuint vboID)
-{
-    GLfloat vtxBufferData[] = {
-        -0.7, 0.7, -0.9, 1.0, 1.0, 0.0,
-        -0.9, 0.3, -0.9, 1.0, 1.0, 0.0,
-        -0.8, 0.5, -0.9, 1.0, 1.0, 1.0,
-        -0.4, 0.3, -0.9, 1.0, 1.0, 1.0,
-        0.8, 0.5, -0.9, 0.0, 1.0, 1.0,
-        0.4, 0.3, -0.9, 0.0, 1.0, 1.0
-    };
-    glBindBuffer(GL_ARRAY_BUFFER, vboID);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*6*6, vtxBufferData, GL_STATIC_DRAW);
-    
-    return 6;
-}
+//int createThreeTriangles(GLuint vboID)
+//{
+//    GLfloat vtxBufferData[] = {
+//        -0.5, 0.0, 0.0, 0.0, 0.0, 1.0,
+//        0.5, 0.0, 0.0, 0.0, 0.0, 1.0,
+//        0.0, 0.5, 0.0, 0.0, 0.0, 1.0,
+//        0.0, 0.1, -0.5, 1.0, 0.0, 0.0,
+//        0.8, 0.1, -0.5, 1.0, 0.0, 0.0,
+//        0.4, 0.8, -0.5, 1.0, 0.0, 0.0,
+//        0.0, -0.5, 0.5, 0.0, 1.0, 0.0,
+//        0.8, -0.5, 0.5, 0.0, 1.0, 0.0,
+//        0.4, 0.3, 0.5, 0.0, 1.0, 0.0
+//    };
+//    glBindBuffer(GL_ARRAY_BUFFER, vboID);
+//    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*9*6, vtxBufferData, GL_STATIC_DRAW);
+//    
+//    return 9;
+//}
+//
+//int createTheeLines(GLuint vboID)
+//{
+//    GLfloat vtxBufferData[] = {
+//        -0.7, 0.7, -0.9, 1.0, 1.0, 0.0,
+//        -0.9, 0.3, -0.9, 1.0, 1.0, 0.0,
+//        -0.8, 0.5, -0.9, 1.0, 1.0, 1.0,
+//        -0.4, 0.3, -0.9, 1.0, 1.0, 1.0,
+//        0.8, 0.5, -0.9, 0.0, 1.0, 1.0,
+//        0.4, 0.3, -0.9, 0.0, 1.0, 1.0
+//    };
+//    glBindBuffer(GL_ARRAY_BUFFER, vboID);
+//    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*6*6, vtxBufferData, GL_STATIC_DRAW);
+//    
+//    return 6;
+//}
 
 int createIndexedCube2(GLuint vboid1, GLuint vboid2, GLuint vboid3)
-{
+{ // 0513
     glBindBuffer(GL_ARRAY_BUFFER, vboid1);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * cube_vtxBufferData2.size(),
                  &cube_vtxBufferData2[0], GL_STATIC_DRAW);
@@ -509,67 +419,67 @@ int createIndexedCube2(GLuint vboid1, GLuint vboid2, GLuint vboid3)
 }
 
 
-int createIndexedCube(GLuint vboID, GLuint veoID)
-{
-    glBindBuffer(GL_ARRAY_BUFFER, vboID); // 0508
-    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*8*6, &cube_vtxBufferData2[0], GL_STATIC_DRAW);
-    
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, veoID); // 0508
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint)*36, &cube_indexData2[0], GL_STATIC_DRAW);
-    
-    return 36;
-}
+//int createIndexedCube(GLuint vboID, GLuint veoID)
+//{
+//    glBindBuffer(GL_ARRAY_BUFFER, vboID); // 0508
+//    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*8*6, &cube_vtxBufferData2[0], GL_STATIC_DRAW);
+//    
+//    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, veoID); // 0508
+//    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint)*36, &cube_indexData2[0], GL_STATIC_DRAW);
+//    
+//    return 36;
+//}
 
-int createCube(GLuint vboID)
-{
-//    GLfloat vtxBufferData[] =  {
-//        -0.1f,-0.1f,-0.1f, 1.0, 0.0, 0.0, // triangle 1 : begin
-//        -0.1f,-0.1f, 0.1f, 1.0, 0.0, 0.0,
-//        -0.1f, 0.1f, 0.1f, 1.0, 0.0, 0.0, // triangle 1 : end
-//        -0.1f,-0.1f,-0.1f, 1.0, 0.0, 0.0,
-//        -0.1f, 0.1f, 0.1f, 1.0, 0.0, 0.0,
-//        -0.1f, 0.1f,-0.1f, 1.0, 0.0, 0.0,
-//        
-//        0.1f, 0.1f,-0.1f, 0.0, 1.0, 0.0, // triangle 3 : begin
-//        -0.1f,-0.1f,-0.1f, 0.0, 1.0, 0.0,
-//        -0.1f, 0.1f,-0.1f, 0.0, 1.0, 0.0,  // triangle 3 : end
-//        0.1f, 0.1f,-0.1f, 0.0, 1.0, 0.0,
-//        0.1f,-0.1f,-0.1f, 0.0, 1.0, 0.0,
-//        -0.1f,-0.1f,-0.1f, 0.0, 1.0, 0.0,
-//        
-//        0.1f,-0.1f, 0.1f, 0.0, 0.0, 1.0,
-//        -0.1f,-0.1f,-0.1f, 0.0, 0.0, 1.0,
-//        0.1f,-0.1f,-0.1f, 0.0, 0.0, 1.0,
-//        0.1f,-0.1f, 0.1f, 0.0, 0.0, 1.0,
-//        -0.1f,-0.1f, 0.1f, 0.0, 0.0, 1.0,
-//        -0.1f,-0.1f,-0.1f, 0.0, 0.0, 1.0,
-//        
-//        -0.1f, 0.1f, 0.1f, 1.0, 1.0, 0.0,
-//        -0.1f,-0.1f, 0.1f, 1.0, 1.0, 0.0,
-//        0.1f,-0.1f, 0.1f, 1.0, 1.0, 0.0,
-//        0.1f, 0.1f, 0.1f, 1.0, 1.0, 0.0,
-//        -0.1f, 0.1f, 0.1f, 1.0, 1.0, 0.0,
-//        0.1f,-0.1f, 0.1f, 1.0, 1.0, 0.0,
-//        
-//        0.1f, 0.1f, 0.1f, 1.0, 0.0, 1.0,
-//        0.1f,-0.1f,-0.1f, 1.0, 0.0, 1.0,
-//        0.1f, 0.1f,-0.1f, 1.0, 0.0, 1.0,
-//        0.1f,-0.1f,-0.1f, 1.0, 0.0, 1.0,
-//        0.1f, 0.1f, 0.1f, 1.0, 0.0, 1.0,
-//        0.1f,-0.1f, 0.1f, 1.0, 0.0, 1.0,
-//        
-//        0.1f, 0.1f, 0.1f, 0.0, 1.0, 1.0,
-//        0.1f, 0.1f,-0.1f, 0.0, 1.0, 1.0,
-//        -0.1f, 0.1f,-0.1f, 0.0, 1.0, 1.0,
-//        0.1f, 0.1f, 0.1f, 0.0, 1.0, 1.0,
-//        -0.1f, 0.1f,-0.1f, 0.0, 1.0, 1.0,
-//        -0.1f, 0.1f, 0.1f, 0.0, 1.0, 1.0
-//    };
-    glBindBuffer(GL_ARRAY_BUFFER, vboID);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*36*6, &cube_vtxBufferData2[0], GL_STATIC_DRAW); // 0508
-    
-    return 36;
-}
+//int createCube(GLuint vboID)
+//{
+////    GLfloat vtxBufferData[] =  {
+////        -0.1f,-0.1f,-0.1f, 1.0, 0.0, 0.0, // triangle 1 : begin
+////        -0.1f,-0.1f, 0.1f, 1.0, 0.0, 0.0,
+////        -0.1f, 0.1f, 0.1f, 1.0, 0.0, 0.0, // triangle 1 : end
+////        -0.1f,-0.1f,-0.1f, 1.0, 0.0, 0.0,
+////        -0.1f, 0.1f, 0.1f, 1.0, 0.0, 0.0,
+////        -0.1f, 0.1f,-0.1f, 1.0, 0.0, 0.0,
+////        
+////        0.1f, 0.1f,-0.1f, 0.0, 1.0, 0.0, // triangle 3 : begin
+////        -0.1f,-0.1f,-0.1f, 0.0, 1.0, 0.0,
+////        -0.1f, 0.1f,-0.1f, 0.0, 1.0, 0.0,  // triangle 3 : end
+////        0.1f, 0.1f,-0.1f, 0.0, 1.0, 0.0,
+////        0.1f,-0.1f,-0.1f, 0.0, 1.0, 0.0,
+////        -0.1f,-0.1f,-0.1f, 0.0, 1.0, 0.0,
+////        
+////        0.1f,-0.1f, 0.1f, 0.0, 0.0, 1.0,
+////        -0.1f,-0.1f,-0.1f, 0.0, 0.0, 1.0,
+////        0.1f,-0.1f,-0.1f, 0.0, 0.0, 1.0,
+////        0.1f,-0.1f, 0.1f, 0.0, 0.0, 1.0,
+////        -0.1f,-0.1f, 0.1f, 0.0, 0.0, 1.0,
+////        -0.1f,-0.1f,-0.1f, 0.0, 0.0, 1.0,
+////        
+////        -0.1f, 0.1f, 0.1f, 1.0, 1.0, 0.0,
+////        -0.1f,-0.1f, 0.1f, 1.0, 1.0, 0.0,
+////        0.1f,-0.1f, 0.1f, 1.0, 1.0, 0.0,
+////        0.1f, 0.1f, 0.1f, 1.0, 1.0, 0.0,
+////        -0.1f, 0.1f, 0.1f, 1.0, 1.0, 0.0,
+////        0.1f,-0.1f, 0.1f, 1.0, 1.0, 0.0,
+////        
+////        0.1f, 0.1f, 0.1f, 1.0, 0.0, 1.0,
+////        0.1f,-0.1f,-0.1f, 1.0, 0.0, 1.0,
+////        0.1f, 0.1f,-0.1f, 1.0, 0.0, 1.0,
+////        0.1f,-0.1f,-0.1f, 1.0, 0.0, 1.0,
+////        0.1f, 0.1f, 0.1f, 1.0, 0.0, 1.0,
+////        0.1f,-0.1f, 0.1f, 1.0, 0.0, 1.0,
+////        
+////        0.1f, 0.1f, 0.1f, 0.0, 1.0, 1.0,
+////        0.1f, 0.1f,-0.1f, 0.0, 1.0, 1.0,
+////        -0.1f, 0.1f,-0.1f, 0.0, 1.0, 1.0,
+////        0.1f, 0.1f, 0.1f, 0.0, 1.0, 1.0,
+////        -0.1f, 0.1f,-0.1f, 0.0, 1.0, 1.0,
+////        -0.1f, 0.1f, 0.1f, 0.0, 1.0, 1.0
+////    };
+//    glBindBuffer(GL_ARRAY_BUFFER, vboID);
+//    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*36*6, &cube_vtxBufferData2[0], GL_STATIC_DRAW); // 0508
+//    
+//    return 36;
+//}
 
 int main(int argc, char **argv)
 {
@@ -614,16 +524,21 @@ int main(int argc, char **argv)
     
     GLuint posID = glGetAttribLocation(programID, "a_Pos");
     glBindBuffer(GL_ARRAY_BUFFER, VBOs[0]); // 0513 bind buffer
+    glEnableVertexAttribArray(posID);
     glVertexAttribPointer(posID, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 3, ((GLvoid*)(0)));
-    //glVertexAttribPointer
+    
     //glVertexAttribPointer(posID, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat)*6, ((GLvoid*)(0)));
     //  2번째:3개 읽음/5 번째: 6개씩 뛴다.
-    glEnableVertexAttribArray(posID);
+    //glEnableVertexAttribArray(posID);
     
     GLuint colID = glGetAttribLocation(programID, "a_Col");
-    glVertexAttribPointer(colID, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat)*6, ((GLvoid*)(sizeof(GLfloat)*3)));
-    // 마지막 : 시작 주소
+    glBindBuffer(GL_ARRAY_BUFFER, VBOs[1]);
     glEnableVertexAttribArray(colID);
+    glVertexAttribPointer(colID, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 3, ((GLvoid *)(0))); // 0513
+    
+    //glVertexAttribPointer(colID, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat)*6, ((GLvoid*)(sizeof(GLfloat)*3)));
+    // 마지막 : 시작 주소
+    //glEnableVertexAttribArray(colID);
     
     glutMouseFunc(myMouse);
     glutKeyboardFunc(myKeyboard);
