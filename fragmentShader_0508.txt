@@ -1,0 +1,11 @@
+#version 400 core
+
+uniform vec3 uniColor;
+
+in vec3 vColor;
+out vec3 color;
+
+void main()
+{
+	color = vColor;
+}
